@@ -75,6 +75,9 @@ const CtrlUI = (() => {
   const UISelector = {
     itemList: document.querySelector('#item-list'),
     btnAdd: document.querySelector('.add-btn'),
+    btnUpdate: document.querySelector('.update-btn'),
+    btnDelete: document.querySelector('.delete-btn'),
+    btnBack: document.querySelector('.back-btn'),
     inputMeal: document.querySelector('#item-name'),
     inputCalories: document.querySelector('#item-calories'),
     totalCal: document.querySelector('.total-calories')
@@ -100,15 +103,37 @@ const CtrlUI = (() => {
     return arrCal.length === 0 ? 0 : arrCal.reduce((total, current) => total + current);
   }
 
+  //render components
+  const renderItems = (state) => {
+    const ul = createUl(state.items);
+    UISelector.itemList.innerHTML = ul;
+  }
+
+  const renderTotal = (state) => {
+    const total = calculateTotal(state.items);
+    UISelector.totalCal.innerHTML = total;
+  }
+
+  const renderBtns = (state) => {
+    if (state.currentItem !== null) {
+      UISelector.btnAdd.style.display = 'none';
+      UISelector.btnUpdate.style.display = 'inline-block';
+      UISelector.btnDelete.style.display = 'inline-block';
+      UISelector.btnBack.style.display = 'inline-block';
+    }  else {
+      UISelector.btnAdd.style.display = 'inline-block';
+      UISelector.btnUpdate.style.display = 'none';
+      UISelector.btnDelete.style.display = 'none';
+      UISelector.btnBack.style.display = 'none';
+    }
+  }
+
   //PUBLIC METHODS
   return {
-    renderItems: (items) => {
-      const ul = createUl(items);
-      UISelector.itemList.innerHTML = ul;
-    },
-    renderTotal: (items) => {
-      const total = calculateTotal(items);
-      UISelector.totalCal.innerHTML = total;
+    renderUI: (state) => {
+      renderItems(state);
+      renderTotal(state);
+      renderBtns(state);
     },
     getInput: () => {
       if (UISelector.inputMeal.value === '' || isNaN(UISelector.inputCalories.value)) return null;
@@ -132,11 +157,15 @@ const App = ((CtrlItem, CtrlUI) => {
   const syncData = () => {
     //get state info from CtrlItem
     const state = CtrlItem.getState();
-    console.log(state);
-    //get items from CtrlItem state and render to UI
-    CtrlUI.renderItems(state.items);
-    CtrlUI.renderTotal(state.items);
+    CtrlUI.renderUI(state);
   }
+
+  //bind events
+  const eventBinding = () => {
+    const uiSelector = CtrlUI.getUiSelector();
+    uiSelector.btnAdd.addEventListener('click', addItem);
+  }
+
   //event action: add new item
   const addItem = function (e) {
     const meal = CtrlUI.getInput();
@@ -146,20 +175,14 @@ const App = ((CtrlItem, CtrlUI) => {
     e.preventDefault();
   }
 
-  //bind events
-  const eventBinding = () => {
-    const uiSelector = CtrlUI.getUiSelector();
-    uiSelector.btnAdd.addEventListener('click', addItem);
-  }
-
   //public methods in return
   return {
     init: () => {
       console.log('Initializing app...');
-      //sync ui with local storage
-      syncData();
       //bind events
       eventBinding();
+      //sync ui with local storage
+      syncData();
     }
   }
 })(CtrlItem, CtrlUI);
