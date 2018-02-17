@@ -128,12 +128,20 @@ const CtrlUI = (() => {
     }
   }
 
+  const renderInputs = (state) => {
+    const meal = state.currentItem;
+    if (meal !== null) {
+      UISelector.inputMeal.value = meal.name
+      UISelector.inputCalories.value = meal.calories
+    }
+  }
   //PUBLIC METHODS
   return {
     renderUI: (state) => {
       renderItems(state);
       renderTotal(state);
       renderBtns(state);
+      renderInputs(state);
     },
     getInput: () => {
       if (UISelector.inputMeal.value === '' || isNaN(UISelector.inputCalories.value)) return null;
@@ -157,6 +165,9 @@ const App = ((CtrlItem, CtrlUI) => {
   const syncData = () => {
     //get state info from CtrlItem
     const state = CtrlItem.getState();
+    console.log(state.currentItem);
+    state.currentItem = {id: 123234098395, name: 'Sweet and Sour Pork', calories: 938}
+    console.log(state.currentItem);
     CtrlUI.renderUI(state);
   }
 
